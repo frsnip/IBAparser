@@ -3,8 +3,10 @@ using IBAparser;
 using System.Text;
 using System.Text.RegularExpressions;
 
-string urlRecipe = "https://iba-world.com/alexander/";
+//string urlRecipe = "https://iba-world.com/alexander/";
+
 var newDBCreator = new DatabaseCreator();
+
 newDBCreator.CreateDB();
 //ShowRecipeByURL(urlRecipe);
 //Console.WriteLine(RecipeByURL(urlRecipe));

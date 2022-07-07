@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -47,6 +48,10 @@ namespace IBAparser
                 builder.AppendLine(newCocktail.RecipeByURL(cocktail.Value));
                 builder.AppendLine("\n\n**************************************************************************************\n\n");
                 recipes.Add(builder.ToString());
+                using (WebClient client = new WebClient())
+                {
+                    client.DownloadFile(new Uri(newCocktail.Image), String.Format("{0}.png", cocktail.Key));
+                }
                 counter++;
                 Console.WriteLine(counter);
                 GC.Collect();

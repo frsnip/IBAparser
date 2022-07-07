@@ -13,6 +13,7 @@ namespace IBAparser
         public string? Method;
         public string? Garnish;
         public string? Other;
+        public string? Image;
 
         public string RecipeByURL(string urlRecipe)
         {
@@ -34,7 +35,7 @@ namespace IBAparser
             Method = result[1].InnerText;
             Garnish = result[2].InnerText;
             var other = new List<string>();
-            var imgUrl = ImgUrl(html);
+            Image = ImgUrl(html);
             try
             {
                 for (int i = 3; i < result.Count; i++)
@@ -49,7 +50,7 @@ namespace IBAparser
             Other = otherBuilder.ToString();
 
             var builder = new StringBuilder();
-            var recipe = string.Format("{3}\n\nINGRIDIENTS:\n\n{0}\n\nMETHOD:\n\n{1}\n\nGARNISH:\n\n{2}\n\n", Ingridients, Method, Garnish, imgUrl);
+            var recipe = string.Format("\n\nINGRIDIENTS:\n\n{0}\n\nMETHOD:\n\n{1}\n\nGARNISH:\n\n{2}\n\n", Ingridients, Method, Garnish);
             builder.AppendLine(recipe);            
             builder.AppendLine(Other);
             return builder.ToString();
