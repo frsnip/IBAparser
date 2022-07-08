@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.SQLite;
+using System.Data;
 
 namespace IBAparser
 {
@@ -13,12 +14,23 @@ namespace IBAparser
         string urlMain = "https://iba-world.com/category/iba-cocktails/";
         public async Task CreateDBAsync()
         {
+            //DeleteDB();
             var mainListParser = new CocktailParser();
             var listMain =  mainListParser.CocktailListFromURL(urlMain);
             var cocktailsDict = new Dictionary<string, string>();
             FillDict(cocktailsDict, listMain);
             await FillBase(cocktailsDict);            
         }
+
+        private void DeleteDB()
+        {
+            if (File.Exists("./CocktailDB.db"))
+            {
+                File.Delete("./CocktailDB.db");
+            }
+
+        }
+
         void FillDict(Dictionary<string, string> cocktailsDict, List<HtmlAgilityPack.HtmlNode> cocktailsList)
         {
             foreach (var cocktail in cocktailsList)
@@ -30,14 +42,19 @@ namespace IBAparser
                 //var imgLink = cocktail.Descendants("div")
                 //    .Where(node => node.GetAttributeValue("class", "")
                 //    .Equals(""));
-                CorrectUniciodeChars(name);
+                CorrectUniciodeChars(ref name);
                 
 
                 cocktailsDict.Add(name, urlLink);
             }
         }
 
-        private void CorrectUniciodeChars(string name)
+        public void InsertIMGToDB()
+        {
+
+        }
+
+        private void CorrectUniciodeChars(ref string name)
         {
             if (name.Contains("&#8217;"))
                 name = name.Replace("&#8217;", "’");
@@ -76,6 +93,10 @@ namespace IBAparser
                     client.DownloadFile(new Uri(newCocktail.Image), String.Format("./RecipeImages/{0}.png", name));
                 }
                 var img = new FileInfo((String.Format("./RecipeImages/{0}.png", name)));
+                newCocktail.ImageBytes = File.ReadAllBytes(img.FullName);
+
+
+
 
 
                 using (var connection = new SQLiteConnection(connectionString.ConnectionString))
@@ -89,10 +110,35 @@ namespace IBAparser
                         var insertCMD = connection.CreateCommand();
                         insertCMD.CommandText = String.Format(
                             "INSERT INTO CocktailRecipes (Name, Ingridients, Method, Garnish, Notes, Image) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')"
-                            , name, newCocktail.Ingridients, newCocktail.Method, newCocktail.Garnish, newCocktail.Notes, img);
+                            , name, newCocktail.Ingridients, newCocktail.Method, newCocktail.Garnish, newCocktail.Notes, newCocktail.ImageBytes);
                         insertCMD.ExecuteNonQuery();
+
+
+
+                        //insertCMD.CommandText = "INSERT INTO CocktailRecipes (Image) VALUES (@img)";
+
+
+                        //insertCMD.Prepare();
+
+                        //insertCMD.Parameters.Add("@img", DbType.Binary, imageBit.Length);
+                        //insertCMD.Parameters.AddWithValue("@img", imageBit);
+                        //insertCMD.ExecuteNonQuery();
+
+
                         transaction.Commit();
                     }
+
+                    //using (var transaction = connection.BeginTransaction())
+                    //{
+                    //var insertIMG = connection.CreateCommand();
+
+
+
+                    //    transaction.Commit();
+                    //}
+
+
+
 
 
                 }
@@ -102,7 +148,7 @@ namespace IBAparser
                 //builder.AppendLine(newCocktail.RecipeByURL(cocktail.Value));
                 //builder.AppendLine("\n\n**************************************************************************************\n\n");
                 //recipes.Add(builder.ToString());
-                
+
 
                 counter++;
                 Console.WriteLine(counter);

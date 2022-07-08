@@ -14,6 +14,7 @@ namespace IBAparser
         public string? Garnish;
         public string? Notes;
         public string? Image;
+        public byte[]? ImageBytes;
 
         public string RecipeByURL(string urlRecipe)
         {
