@@ -12,7 +12,7 @@ namespace IBAparser
         public string? Ingridients;
         public string? Method;
         public string? Garnish;
-        public string? Other;
+        public string? Notes;
         public string? Image;
 
         public string RecipeByURL(string urlRecipe)
@@ -47,12 +47,12 @@ namespace IBAparser
             var otherBuilder = new StringBuilder();
             foreach (var entry in other)
                 otherBuilder.Append(string.Format("{0}\n", entry));
-            Other = otherBuilder.ToString();
+            Notes = otherBuilder.ToString();
 
             var builder = new StringBuilder();
             var recipe = string.Format("\n\nINGRIDIENTS:\n\n{0}\n\nMETHOD:\n\n{1}\n\nGARNISH:\n\n{2}\n\n", Ingridients, Method, Garnish);
             builder.AppendLine(recipe);            
-            builder.AppendLine(Other);
+            builder.AppendLine(Notes);
             return builder.ToString();
         }
 

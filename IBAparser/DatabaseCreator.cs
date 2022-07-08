@@ -4,19 +4,20 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data.SQLite;
 
 namespace IBAparser
 {
     public class DatabaseCreator
     {
         string urlMain = "https://iba-world.com/category/iba-cocktails/";
-        public void CreateDB()
+        public async Task CreateDBAsync()
         {
             var mainListParser = new CocktailParser();
             var listMain =  mainListParser.CocktailListFromURL(urlMain);
             var cocktailsDict = new Dictionary<string, string>();
             FillDict(cocktailsDict, listMain);
-            FillBase(cocktailsDict);            
+            await FillBase(cocktailsDict);            
         }
         void FillDict(Dictionary<string, string> cocktailsDict, List<HtmlAgilityPack.HtmlNode> cocktailsList)
         {
@@ -29,36 +30,93 @@ namespace IBAparser
                 //var imgLink = cocktail.Descendants("div")
                 //    .Where(node => node.GetAttributeValue("class", "")
                 //    .Equals(""));
-
-                if (name.Contains("&#8217;"))
-                    name = name.Replace("&#8217;", "'");
+                CorrectUniciodeChars(name);
+                
 
                 cocktailsDict.Add(name, urlLink);
             }
         }
+
+        private void CorrectUniciodeChars(string name)
+        {
+            if (name.Contains("&#8217;"))
+                name = name.Replace("&#8217;", "’");
+            if (name.Contains("&#8216;"))
+                name = name.Replace("&#8216;", "‘");
+        }
+
         public async Task FillBase(Dictionary<string, string>  cocktailsDict)
         {
             var recipes = new List<string>();
             int counter = 0;
+
+            var connectionString = new SQLiteConnectionStringBuilder();
+            connectionString.DataSource = "./CocktailDB.db";
+
+            //using (var connection = new SQLiteConnection(connectionString.ConnectionString))
+            //{
+            //    connection.Open();
+
+
+            //}
+
+                
             foreach (var cocktail in cocktailsDict)
+                
             {
-                var builder = new StringBuilder();
-                builder.Append(String.Format("{0}\n{1}\n", cocktail.Key, cocktail.Value));
+                    //InsertCoctailToDB(connectionString);
+
+                var name = cocktail.Key;
+
+                
                 var newCocktail = new CocktailParser();
-                builder.AppendLine(newCocktail.RecipeByURL(cocktail.Value));
-                builder.AppendLine("\n\n**************************************************************************************\n\n");
-                recipes.Add(builder.ToString());
+                newCocktail.RecipeByURL(cocktail.Value);
                 using (WebClient client = new WebClient())
                 {
-                    client.DownloadFile(new Uri(newCocktail.Image), String.Format("{0}.png", cocktail.Key));
+                    client.DownloadFile(new Uri(newCocktail.Image), String.Format("./RecipeImages/{0}.png", name));
                 }
+                var img = new FileInfo((String.Format("./RecipeImages/{0}.png", name)));
+
+
+                using (var connection = new SQLiteConnection(connectionString.ConnectionString))
+                {
+
+                    connection.Open();
+
+
+                    using (var transaction = connection.BeginTransaction())
+                    {
+                        var insertCMD = connection.CreateCommand();
+                        insertCMD.CommandText = String.Format(
+                            "INSERT INTO CocktailRecipes (Name, Ingridients, Method, Garnish, Notes, Image) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')"
+                            , name, newCocktail.Ingridients, newCocktail.Method, newCocktail.Garnish, newCocktail.Notes, img);
+                        insertCMD.ExecuteNonQuery();
+                        transaction.Commit();
+                    }
+
+
+                }
+
+                //var builder = new StringBuilder();
+                //builder.Append(String.Format("{0}\n{1}\n", name, cocktail.Value));
+                //builder.AppendLine(newCocktail.RecipeByURL(cocktail.Value));
+                //builder.AppendLine("\n\n**************************************************************************************\n\n");
+                //recipes.Add(builder.ToString());
+                
+
                 counter++;
                 Console.WriteLine(counter);
                 GC.Collect();
+
+
+
             }
             await File.AppendAllLinesAsync("RecipeBookNew.txt", recipes);
         }
 
-
+        private void InsertCoctailToDB(SQLiteConnectionStringBuilder connectionString)
+        {
+            
+        }
     }
 }

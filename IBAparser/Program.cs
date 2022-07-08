@@ -6,8 +6,8 @@ using System.Text.RegularExpressions;
 //string urlRecipe = "https://iba-world.com/alexander/";
 
 var newDBCreator = new DatabaseCreator();
-
-newDBCreator.CreateDB();
+Directory.CreateDirectory("./RecipeImages");
+await newDBCreator.CreateDBAsync();
 //ShowRecipeByURL(urlRecipe);
 //Console.WriteLine(RecipeByURL(urlRecipe));
 
