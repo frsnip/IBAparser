@@ -32,20 +32,13 @@ namespace IBAparser
                    .Where(node => node.GetAttributeValue("class", "")
                    .Equals("et_pb_module et_pb_post_content et_pb_post_content_0_tb_body blog-post-content")).ToList();
 
-            ///Creates List with individual entries for each cocktail
+            
             var result = cocktailsHtml[0].Descendants("p").ToList();
             Ingridients = result[0].InnerText;
             Method = result[1].InnerText;
             Garnish = result[2].InnerText;
             var other = new List<string>();
-            Image = ImgUrl(html.Result);
-
-            using (WebClient client = new WebClient())
-            {
-                client.DownloadFile(new Uri(Image), String.Format("./RecipeImages/{0}.png", Name));
-            }
-            var img = new FileInfo((String.Format("./RecipeImages/{0}.png", Name)));
-            ImageBytes = File.ReadAllBytes(img.FullName);
+            
 
             try
             {
@@ -59,6 +52,17 @@ namespace IBAparser
             foreach (var entry in other)
                 otherBuilder.Append(string.Format("{0}\n", entry));
             Notes = otherBuilder.ToString();
+
+
+
+            Image = ImgUrl(html.Result);
+
+            using (WebClient client = new WebClient())
+            {
+                client.DownloadFile(new Uri(Image), String.Format("./RecipeImages/{0}.png", Name));
+            }
+            var img = new FileInfo((String.Format("./RecipeImages/{0}.png", Name)));
+            ImageBytes = File.ReadAllBytes(img.FullName);
 
             //var builder = new StringBuilder();
             //var recipe = string.Format("\n\nINGRIDIENTS:\n\n{0}\n\nMETHOD:\n\n{1}\n\nGARNISH:\n\n{2}\n\n", Ingridients, Method, Garnish);

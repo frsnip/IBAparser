@@ -95,7 +95,7 @@ await newDBCreator.CreateDBAsync();
 //}
 //await File.AppendAllLinesAsync("RecipeBook.txt", recipes);
 
-Console.WriteLine();
+Console.ReadLine();
 /// Parses whole html for individual cocktail entries
 //List<HtmlAgilityPack.HtmlNode> CocktailListFromURL(string url)
 //{
