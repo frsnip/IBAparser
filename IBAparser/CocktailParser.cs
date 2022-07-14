@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,6 +10,7 @@ namespace IBAparser
 {
     public class CocktailParser
     {
+        public string? Name;
         public string? Ingridients;
         public string? Method;
         public string? Garnish;
@@ -16,15 +18,15 @@ namespace IBAparser
         public string? Image;
         public byte[]? ImageBytes;
 
-        public void RecipeByURL(string urlRecipe)
+        public async Task RecipeByURL(string urlRecipe)
         {
             var httpClient = new HttpClient();
 
             ///Takes html structure from URL and presents it as a string
-            var html = httpClient.GetStringAsync(urlRecipe).Result;
+            var html = httpClient.GetStringAsync(urlRecipe);
 
             var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(html);
+            htmlDocument.LoadHtml(html.Result);
 
             var cocktailsHtml = htmlDocument.DocumentNode.Descendants("div")
                    .Where(node => node.GetAttributeValue("class", "")
@@ -36,7 +38,15 @@ namespace IBAparser
             Method = result[1].InnerText;
             Garnish = result[2].InnerText;
             var other = new List<string>();
-            Image = ImgUrl(html);
+            Image = ImgUrl(html.Result);
+
+            using (WebClient client = new WebClient())
+            {
+                client.DownloadFile(new Uri(Image), String.Format("./RecipeImages/{0}.png", Name));
+            }
+            var img = new FileInfo((String.Format("./RecipeImages/{0}.png", Name)));
+            ImageBytes = File.ReadAllBytes(img.FullName);
+
             try
             {
                 for (int i = 3; i < result.Count; i++)
