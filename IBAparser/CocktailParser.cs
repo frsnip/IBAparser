@@ -16,7 +16,7 @@ namespace IBAparser
         public string? Image;
         public byte[]? ImageBytes;
 
-        public string RecipeByURL(string urlRecipe)
+        public void RecipeByURL(string urlRecipe)
         {
             var httpClient = new HttpClient();
 
@@ -50,11 +50,11 @@ namespace IBAparser
                 otherBuilder.Append(string.Format("{0}\n", entry));
             Notes = otherBuilder.ToString();
 
-            var builder = new StringBuilder();
-            var recipe = string.Format("\n\nINGRIDIENTS:\n\n{0}\n\nMETHOD:\n\n{1}\n\nGARNISH:\n\n{2}\n\n", Ingridients, Method, Garnish);
-            builder.AppendLine(recipe);            
-            builder.AppendLine(Notes);
-            return builder.ToString();
+            //var builder = new StringBuilder();
+            //var recipe = string.Format("\n\nINGRIDIENTS:\n\n{0}\n\nMETHOD:\n\n{1}\n\nGARNISH:\n\n{2}\n\n", Ingridients, Method, Garnish);
+            //builder.AppendLine(recipe);            
+            //builder.AppendLine(Notes);
+            //return builder.ToString();
         }
 
         public string ImgUrl(string html)

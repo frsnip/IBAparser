@@ -47,6 +47,7 @@ namespace IBAparser
 
                 cocktailsDict.Add(name, urlLink);
             }
+            Console.WriteLine("Main page have been parsed");
         }
 
         public void InsertIMGToDB()
@@ -70,99 +71,69 @@ namespace IBAparser
             var connectionString = new SQLiteConnectionStringBuilder();
             connectionString.DataSource = "./CocktailDB.db";
 
-            //using (var connection = new SQLiteConnection(connectionString.ConnectionString))
+            var cockList = new List<Task>();
+            //foreach (var cocktail in cocktailsDict)
             //{
-            //    connection.Open();
 
+            //    var newCocktail = new CocktailParser();
+            //    newCocktail.RecipeByURL(cocktail.Value));
 
             //}
+
+            var taskList = new List<Task>();
 
                 
             foreach (var cocktail in cocktailsDict)
                 
             {
-                    //InsertCoctailToDB(connectionString);
-
-                var name = cocktail.Key;
-
-                
-                var newCocktail = new CocktailParser();
-                newCocktail.RecipeByURL(cocktail.Value);
-                using (WebClient client = new WebClient())
-                {
-                    client.DownloadFile(new Uri(newCocktail.Image), String.Format("./RecipeImages/{0}.png", name));
-                }
-                var img = new FileInfo((String.Format("./RecipeImages/{0}.png", name)));
-                newCocktail.ImageBytes = File.ReadAllBytes(img.FullName);
-
-
-
-
-
-                using (var connection = new SQLiteConnection(connectionString.ConnectionString))
-                {
-
-                    connection.Open();
-
-
-                    using (var transaction = connection.BeginTransaction())
-                    {
-                        var insertCMD = connection.CreateCommand();
-                        insertCMD.CommandText = String.Format(
-                            "INSERT INTO CocktailRecipes (Name, Ingridients, Method, Garnish, Notes, Image) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')"
-                            , name, newCocktail.Ingridients, newCocktail.Method, newCocktail.Garnish, newCocktail.Notes, newCocktail.ImageBytes);
-                        insertCMD.ExecuteNonQuery();
-
-
-
-                        //insertCMD.CommandText = "INSERT INTO CocktailRecipes (Image) VALUES (@img)";
-
-
-                        //insertCMD.Prepare();
-
-                        //insertCMD.Parameters.Add("@img", DbType.Binary, imageBit.Length);
-                        //insertCMD.Parameters.AddWithValue("@img", imageBit);
-                        //insertCMD.ExecuteNonQuery();
-
-
-                        transaction.Commit();
-                    }
-
-                    //using (var transaction = connection.BeginTransaction())
-                    //{
-                    //var insertIMG = connection.CreateCommand();
-
-
-
-                    //    transaction.Commit();
-                    //}
-
-
-
-
-
-                }
-
-                //var builder = new StringBuilder();
-                //builder.Append(String.Format("{0}\n{1}\n", name, cocktail.Value));
-                //builder.AppendLine(newCocktail.RecipeByURL(cocktail.Value));
-                //builder.AppendLine("\n\n**************************************************************************************\n\n");
-                //recipes.Add(builder.ToString());
-
+                                
+                taskList.Add(InsertCoctailToDB(connectionString, cocktail));
 
                 counter++;
                 Console.WriteLine(counter);
                 GC.Collect();
 
-
-
             }
-            await File.AppendAllLinesAsync("RecipeBookNew.txt", recipes);
+            //await File.AppendAllLinesAsync("RecipeBookNew.txt", recipes);
+            await Task.WhenAll(taskList);
         }
 
-        private void InsertCoctailToDB(SQLiteConnectionStringBuilder connectionString)
+        private async Task InsertCoctailToDB(SQLiteConnectionStringBuilder connectionString, KeyValuePair<string, string> cocktail)
         {
-            
+            var name = cocktail.Key;
+
+
+            var newCocktail = new CocktailParser();
+            newCocktail.RecipeByURL(cocktail.Value);
+            using (WebClient client = new WebClient())
+            {
+                client.DownloadFile(new Uri(newCocktail.Image), String.Format("./RecipeImages/{0}.png", name));
+            }
+            var img = new FileInfo((String.Format("./RecipeImages/{0}.png", name)));
+            newCocktail.ImageBytes = File.ReadAllBytes(img.FullName);
+
+
+            using (var connection = new SQLiteConnection(connectionString.ConnectionString))
+            {
+
+                connection.Open();
+
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    var insertCMD = connection.CreateCommand();
+
+                    insertCMD.CommandText = String.Format(
+                        "INSERT INTO CocktailRecipes (Name, Ingridients, Method, Garnish, Notes, Image) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')"
+                        , name, newCocktail.Ingridients, newCocktail.Method, newCocktail.Garnish, newCocktail.Notes, newCocktail.ImageBytes);
+
+                    await insertCMD.ExecuteNonQueryAsync();
+
+                    transaction.Commit();
+                }
+
+            }
+
         }
     }
 }
