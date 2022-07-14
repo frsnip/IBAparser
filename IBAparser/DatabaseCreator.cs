@@ -37,22 +37,22 @@ namespace IBAparser
                 {
                     var dropCMD = connection.CreateCommand();
 
-                    dropCMD.CommandText = "DROP TABLE IF EXISTS CocktailRecipes";
+                    dropCMD.CommandText = "DELETE FROM CocktailRecipes";
 
                     dropCMD.ExecuteNonQuery();
 
-                    dropCMD.CommandText = @"CREATE TABLE 'CocktailRecipes' 
-                                            ( 
-                                                'ID' INTEGER NOT NULL UNIQUE, 
-                                                'Name'  TEXT NOT NULL UNIQUE,
-                                                'Image' BLOB,
-	                                            'Ingridients'   TEXT,
-	                                            'Method'    TEXT,
-	                                            'Garnish'   TEXT,
-	                                            'Notes' TEXT,
-	                                            PRIMARY KEY('ID' AUTOINCREMENT)
-                                            )";
-                    dropCMD.ExecuteNonQuery();
+                    //dropCMD.CommandText = @"CREATE TABLE 'CocktailRecipes' 
+                    //                        ( 
+                    //                            'ID' INTEGER NOT NULL UNIQUE, 
+                    //                            'Name'  TEXT NOT NULL UNIQUE,
+                    //                            'Image' BLOB,
+	                   //                         'Ingridients'   TEXT,
+	                   //                         'Method'    TEXT,
+	                   //                         'Garnish'   TEXT,
+	                   //                         'Notes' TEXT,
+	                   //                         PRIMARY KEY('ID' AUTOINCREMENT)
+                    //                        )";
+                    //dropCMD.ExecuteNonQuery();
 
                     transaction.Commit();
                 }

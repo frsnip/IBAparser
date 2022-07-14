@@ -35,23 +35,34 @@ namespace IBAparser
             
             var result = cocktailsHtml[0].Descendants("p").ToList();
             Ingridients = result[0].InnerText;
-            Method = result[1].InnerText;
-            Garnish = result[2].InnerText;
-            var other = new List<string>();
+
             
+            var methodList = new List<string>();
 
-            try
-            {
-                for (int i = 3; i < result.Count; i++)
-                    other.Add(result[i].InnerText);
-            }
-            catch (IndexOutOfRangeException)
-            { }
 
-            var otherBuilder = new StringBuilder();
-            foreach (var entry in other)
-                otherBuilder.Append(string.Format("{0}\n", entry));
-            Notes = otherBuilder.ToString();
+            var splittedRecipe = cocktailsHtml[0].InnerText.Split("METHOD");
+
+            
+            Method = splittedRecipe[1].Trim();
+
+
+            //Method = result[1].InnerText;
+            //Garnish = result[2].InnerText;
+            //var other = new List<string>();
+
+
+            //try
+            //{
+            //    for (int i = 3; i < result.Count; i++)
+            //        other.Add(result[i].InnerText);
+            //}
+            //catch (IndexOutOfRangeException)
+            //{ }
+
+            //var otherBuilder = new StringBuilder();
+            //foreach (var entry in other)
+            //    otherBuilder.Append(string.Format("{0}\n", entry));
+            //Notes = otherBuilder.ToString();
 
 
 
