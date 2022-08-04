@@ -6,7 +6,7 @@ namespace IBAparser
 {
     public class DatabaseCreator
     {
-        string urlMain = "https://iba-world.com/category/iba-cocktails/";
+        private string urlMain = "https://iba-world.com/category/iba-cocktails/";
         public async Task CreateDBAsync()
         {
             var timerGlobal = new Stopwatch();
@@ -42,7 +42,7 @@ namespace IBAparser
             }
         }
 
-        void FillDict(Dictionary<string, string> cocktailsDict, List<HtmlAgilityPack.HtmlNode> cocktailsList)
+        private void FillDict(Dictionary<string, string> cocktailsDict, List<HtmlAgilityPack.HtmlNode> cocktailsList)
         {
             var timer = new Stopwatch();
             timer.Start();
@@ -76,7 +76,7 @@ namespace IBAparser
                 name = name.Replace("&#8216;", "‘");
         }
 
-        public async Task FillBase(Dictionary<string, string>  cocktailsDict)
+        private async Task FillBase(Dictionary<string, string>  cocktailsDict)
         {
             var recipes = new List<string>();
             int counter = 0;
@@ -90,8 +90,7 @@ namespace IBAparser
             foreach (var cocktail in cocktailsDict)
             {
                 var newCocktail = new CocktailParser();
-                newCocktail.Name = cocktail.Key;
-                cockTaskList.Add(newCocktail.RecipeByURL(cocktail.Value));
+                cockTaskList.Add(newCocktail.RecipeByURL(cocktail));
                 cockList.Add(newCocktail);
                 counter++;
                 Console.Write(String.Format("\rIndividual cocktails parsed: \t{0} of {1}", counter, cocktailsAmmount));

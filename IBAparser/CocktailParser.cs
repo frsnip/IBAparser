@@ -5,20 +5,20 @@ namespace IBAparser
 {
     public class CocktailParser
     {
-        public string? Name;
-        public string? Ingridients;
-        public string? Method;
-        public string? Garnish;
-        public string? Notes;
-        public string? Image;
-        public byte[]? ImageBytes;
+        public string Name { get; private set; }
+        public string? Ingridients { get; private set; }
+        public string? Method { get; private set; }
+        public string? Garnish { get; private set; }
+        public string? Notes { get; private set; }
+        public string? Image { get; private set; }
+        public byte[]? ImageBytes { get; private set; }
 
-        public async Task RecipeByURL(string urlRecipe)
+        public async Task RecipeByURL(KeyValuePair<string, string> cocktail)
         {
             var httpClient = new HttpClient();
 
             ///Takes html structure from URL and presents it as a string
-            var html = httpClient.GetStringAsync(urlRecipe);
+            var html = httpClient.GetStringAsync(cocktail.Value);
 
             var htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(html.Result);
@@ -33,7 +33,9 @@ namespace IBAparser
             var methodList = new List<string>();
 
             var splittedRecipe = cocktailsHtml[0].InnerText.Split("METHOD");
-            
+
+            Name = cocktail.Key;
+
             Method = splittedRecipe[1].Trim();
 
             Image = ImgUrl(html.Result);
