@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data.SQLite;
+﻿using System.Data.SQLite;
 using System.Data;
+using System.Diagnostics;
 
 namespace IBAparser
 {
@@ -14,12 +9,18 @@ namespace IBAparser
         string urlMain = "https://iba-world.com/category/iba-cocktails/";
         public async Task CreateDBAsync()
         {
+            var timerGlobal = new Stopwatch();
+            timerGlobal.Start();
+
             CleanTable();
             var mainListParser = new CocktailParser();
             var listMain =  mainListParser.CocktailListFromURL(urlMain);
             var cocktailsDict = new Dictionary<string, string>();
             FillDict(cocktailsDict, listMain);
-            await FillBase(cocktailsDict);            
+            await FillBase(cocktailsDict);  
+            
+            timerGlobal.Stop();
+            Console.WriteLine(String.Format("\nAll cocktails have been parsed in {0}", timerGlobal.Elapsed));
         }
 
         private void CleanTable()
@@ -29,56 +30,37 @@ namespace IBAparser
 
             using (var connection = new SQLiteConnection(connectionString.ConnectionString))
             {
-
                 connection.Open();
-
 
                 using (var transaction = connection.BeginTransaction())
                 {
                     var dropCMD = connection.CreateCommand();
-
                     dropCMD.CommandText = "DELETE FROM CocktailRecipes";
-
                     dropCMD.ExecuteNonQuery();
-
-                    //dropCMD.CommandText = @"CREATE TABLE 'CocktailRecipes' 
-                    //                        ( 
-                    //                            'ID' INTEGER NOT NULL UNIQUE, 
-                    //                            'Name'  TEXT NOT NULL UNIQUE,
-                    //                            'Image' BLOB,
-	                   //                         'Ingridients'   TEXT,
-	                   //                         'Method'    TEXT,
-	                   //                         'Garnish'   TEXT,
-	                   //                         'Notes' TEXT,
-	                   //                         PRIMARY KEY('ID' AUTOINCREMENT)
-                    //                        )";
-                    //dropCMD.ExecuteNonQuery();
-                    
                     transaction.Commit();
                 }
-
             }
-
-
         }
 
         void FillDict(Dictionary<string, string> cocktailsDict, List<HtmlAgilityPack.HtmlNode> cocktailsList)
         {
+            var timer = new Stopwatch();
+            timer.Start();
+
             foreach (var cocktail in cocktailsList)
             {
                 var name = cocktail.Descendants("h3")
                     .Where(node => node.GetAttributeValue("class", "")
                     .Equals("entry-title")).First().InnerText;
                 var urlLink = cocktail.Descendants("a").First().GetAttributeValue("href", "");
-                //var imgLink = cocktail.Descendants("div")
-                //    .Where(node => node.GetAttributeValue("class", "")
-                //    .Equals(""));
-                CorrectUniciodeChars(ref name);
                 
+                CorrectUniciodeChars(ref name);                
 
                 cocktailsDict.Add(name, urlLink);
             }
-            Console.WriteLine("Main page have been parsed");
+
+            timer.Stop();
+            Console.WriteLine(String.Format("\rMain page have been parsed in {0} seconds", (double)timer.ElapsedMilliseconds/1000));
         }
 
         public void InsertIMGToDB()
@@ -98,39 +80,33 @@ namespace IBAparser
         {
             var recipes = new List<string>();
             int counter = 0;
+            int cocktailsAmmount = cocktailsDict.Count();
+            var cockTaskList = new List<Task>();
+            var cockList = new List<CocktailParser>();
 
             var connectionString = new SQLiteConnectionStringBuilder();
             connectionString.DataSource = "./CocktailDB.db";
 
-            var cockTaskList = new List<Task>();
-            var cockList = new List<CocktailParser>();
             foreach (var cocktail in cocktailsDict)
             {
-
                 var newCocktail = new CocktailParser();
                 newCocktail.Name = cocktail.Key;
                 cockTaskList.Add(newCocktail.RecipeByURL(cocktail.Value));
                 cockList.Add(newCocktail);
-
-
+                counter++;
+                Console.Write(String.Format("\rIndividual cocktails parsed: \t{0} of {1}", counter, cocktailsAmmount));
             }
             await Task.WhenAll(cockTaskList);
 
             var taskList = new List<Task>();
-
                 
             foreach (var cocktail in cockList)
                 
-            {
-                                
-                taskList.Add(InsertCoctailToDB(connectionString, cocktail));
-
-                counter++;
-                Console.WriteLine(counter);
+            {                                
+                taskList.Add(InsertCoctailToDB(connectionString, cocktail));                
                 GC.Collect();
-
             }
-            //await File.AppendAllLinesAsync("RecipeBookNew.txt", recipes);
+            
             await Task.WhenAll(taskList);
         }
 
@@ -138,25 +114,18 @@ namespace IBAparser
         {
             using (var connection = new SQLiteConnection(connectionString.ConnectionString))
             {
-
                 connection.Open();
-
 
                 using (var transaction = connection.BeginTransaction())
                 {
                     var insertCMD = connection.CreateCommand();
-
                     insertCMD.CommandText = String.Format(
-                        "INSERT INTO CocktailRecipes (Name, Ingridients, Method, Garnish, Notes, Image) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')"
-                        , cocktail.Name, cocktail.Ingridients, cocktail.Method, cocktail.Garnish, cocktail.Notes, cocktail.ImageBytes);
-
+                        "INSERT INTO CocktailRecipes (Name, Ingridients, Method, Image) VALUES ('{0}', '{1}', '{2}', '{3}')"
+                        , cocktail.Name, cocktail.Ingridients, cocktail.Method,  cocktail.ImageBytes);
                     await insertCMD.ExecuteNonQueryAsync();
-
                     transaction.Commit();
                 }
-
             }
-
         }
     }
 }

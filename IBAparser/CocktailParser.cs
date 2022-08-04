@@ -1,10 +1,5 @@
 ﻿using HtmlAgilityPack;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IBAparser
 {
@@ -31,17 +26,13 @@ namespace IBAparser
             var cocktailsHtml = htmlDocument.DocumentNode.Descendants("div")
                    .Where(node => node.GetAttributeValue("class", "")
                    .Equals("et_pb_module et_pb_post_content et_pb_post_content_0_tb_body blog-post-content")).ToList();
-
             
             var result = cocktailsHtml[0].Descendants("p").ToList();
             Ingridients = result[0].InnerText;
-
             
             var methodList = new List<string>();
 
-
             var splittedRecipe = cocktailsHtml[0].InnerText.Split("METHOD");
-
             
             Method = splittedRecipe[1].Trim();
 
@@ -57,10 +48,6 @@ namespace IBAparser
 
         public string ImgUrl(string html)
         {
-            //var httpClient = new HttpClient();
-
-            
-            //var html = httpClient.GetStringAsync(urlRecipe).Result;
             var ind = html.IndexOf("og:image");
             var imgLine = html.Substring(ind, 500);
             var split = imgLine.Split("\"");
