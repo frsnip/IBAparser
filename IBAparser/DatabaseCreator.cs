@@ -99,8 +99,7 @@ namespace IBAparser
 
             var taskList = new List<Task>();
                 
-            foreach (var cocktail in cockList)
-                
+            foreach (var cocktail in cockList)                
             {                                
                 taskList.Add(InsertCoctailToDB(connectionString, cocktail));                
                 GC.Collect();
