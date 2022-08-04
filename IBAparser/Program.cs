@@ -3,11 +3,14 @@ using IBAparser;
 using System.Text;
 using System.Text.RegularExpressions;
 
-//string urlRecipe = "https://iba-world.com/alexander/";
+
 
 var newDBCreator = new DatabaseCreator();
 Directory.CreateDirectory("./RecipeImages");
 await newDBCreator.CreateDBAsync();
+Console.ReadLine();
+
+
 //ShowRecipeByURL(urlRecipe);
 //Console.WriteLine(RecipeByURL(urlRecipe));
 
@@ -95,7 +98,6 @@ await newDBCreator.CreateDBAsync();
 //}
 //await File.AppendAllLinesAsync("RecipeBook.txt", recipes);
 
-Console.ReadLine();
 /// Parses whole html for individual cocktail entries
 //List<HtmlAgilityPack.HtmlNode> CocktailListFromURL(string url)
 //{

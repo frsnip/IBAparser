@@ -45,27 +45,6 @@ namespace IBAparser
             
             Method = splittedRecipe[1].Trim();
 
-
-            //Method = result[1].InnerText;
-            //Garnish = result[2].InnerText;
-            //var other = new List<string>();
-
-
-            //try
-            //{
-            //    for (int i = 3; i < result.Count; i++)
-            //        other.Add(result[i].InnerText);
-            //}
-            //catch (IndexOutOfRangeException)
-            //{ }
-
-            //var otherBuilder = new StringBuilder();
-            //foreach (var entry in other)
-            //    otherBuilder.Append(string.Format("{0}\n", entry));
-            //Notes = otherBuilder.ToString();
-
-
-
             Image = ImgUrl(html.Result);
 
             using (WebClient client = new WebClient())
@@ -74,19 +53,13 @@ namespace IBAparser
             }
             var img = new FileInfo((String.Format("./RecipeImages/{0}.png", Name)));
             ImageBytes = File.ReadAllBytes(img.FullName);
-
-            //var builder = new StringBuilder();
-            //var recipe = string.Format("\n\nINGRIDIENTS:\n\n{0}\n\nMETHOD:\n\n{1}\n\nGARNISH:\n\n{2}\n\n", Ingridients, Method, Garnish);
-            //builder.AppendLine(recipe);            
-            //builder.AppendLine(Notes);
-            //return builder.ToString();
         }
 
         public string ImgUrl(string html)
         {
             //var httpClient = new HttpClient();
 
-            /////Takes html structure from URL and presents it as a string
+            
             //var html = httpClient.GetStringAsync(urlRecipe).Result;
             var ind = html.IndexOf("og:image");
             var imgLine = html.Substring(ind, 500);

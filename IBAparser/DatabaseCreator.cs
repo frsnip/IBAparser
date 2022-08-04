@@ -53,7 +53,7 @@ namespace IBAparser
 	                   //                         PRIMARY KEY('ID' AUTOINCREMENT)
                     //                        )";
                     //dropCMD.ExecuteNonQuery();
-
+                    
                     transaction.Commit();
                 }
 
@@ -136,19 +136,6 @@ namespace IBAparser
 
         private async Task InsertCoctailToDB(SQLiteConnectionStringBuilder connectionString, CocktailParser cocktail)
         {
-            //var name = cocktail.Key;
-
-
-            //var newCocktail = new CocktailParser();
-            //await newCocktail.RecipeByURL(cocktail.Value);
-            //using (WebClient client = new WebClient())
-            //{
-            //    client.DownloadFile(new Uri(newCocktail.Image), String.Format("./RecipeImages/{0}.png", name));
-            //}
-            //var img = new FileInfo((String.Format("./RecipeImages/{0}.png", name)));
-            //newCocktail.ImageBytes = File.ReadAllBytes(img.FullName);
-
-
             using (var connection = new SQLiteConnection(connectionString.ConnectionString))
             {
 
